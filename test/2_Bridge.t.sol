@@ -14,14 +14,21 @@ contract ExecutableOracleBridgeTest is PRBTest {
     function testReceive() external {
         // Arrange
         uint256 sendAmount = 1 ether;
-        vm.deal(address(executableOracle), sendAmount);
+        vm.deal(address(executableOracle), 0);
 
-        // Act
-        payable(address(executableOracle)).send(sendAmount);
+        // Send ETH to the contract
+        (bool success,) = payable(address(executableOracle)).call{ value: sendAmount, gas: 100_000 }("");
+
+        if (!success) {
+            revert SendFailed();
+        }
 
         // Assert
         uint256 balance = address(executableOracle).balance;
         console2.log("Received Balance: ", balance);
+
         assertEq(balance, sendAmount, "Balance should match the sent amount");
     }
+
+    error SendFailed();
 }

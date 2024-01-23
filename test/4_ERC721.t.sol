@@ -16,7 +16,7 @@ contract ExecutableOracleTest is PRBTest, StdCheats {
         // erc721Token = IERC721(address(mockERC721Token));
     }
 
-    function testStoreAndGetERC721Holdings() external {
+    function testStoreAndGetERC721Holdings() external pure {
         console2.log("Hello World");
     }
 }

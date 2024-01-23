@@ -2,7 +2,6 @@ pragma solidity >=0.8.23 <0.9.0;
 
 import { PRBTest } from "@prb/test/src/PRBTest.sol";
 import { ExecutableOracle } from "../src/1_ExecutableOracle.sol";
-import { console2 } from "forge-std/src/console2.sol";
 
 contract ExecutableOracleOwnerTest is PRBTest {
     ExecutableOracle internal executableOracle;
@@ -19,7 +18,7 @@ contract ExecutableOracleOwnerTest is PRBTest {
         vm.startPrank(nonOwner);
 
         // Act & Assert
-        vm.expectRevert("Not the owner");
+        vm.expectRevert(ExecutableOracle.NotOwner.selector);
         executableOracle.withdrawETH(payable(nonOwner), withdrawAmount);
 
         vm.stopPrank();
@@ -34,7 +33,7 @@ contract ExecutableOracleOwnerTest is PRBTest {
         vm.startPrank(nonOwner);
 
         // Act & Assert
-        vm.expectRevert("Not the owner");
+        vm.expectRevert(ExecutableOracle.NotOwner.selector);
         executableOracle.releaseERC20(tokenAddress, to, amount);
 
         vm.stopPrank();
@@ -49,7 +48,7 @@ contract ExecutableOracleOwnerTest is PRBTest {
         vm.startPrank(nonOwner);
 
         // Act & Assert
-        vm.expectRevert("Not the owner");
+        vm.expectRevert(ExecutableOracle.NotOwner.selector);
         executableOracle.releaseERC721(tokenAddress, to, tokenId);
 
         vm.stopPrank();
@@ -65,7 +64,7 @@ contract ExecutableOracleOwnerTest is PRBTest {
         vm.startPrank(nonOwner);
 
         // Act & Assert
-        vm.expectRevert("Not the owner");
+        vm.expectRevert(ExecutableOracle.NotOwner.selector);
         executableOracle.settleBlobIndex(accounts, blobIndex);
 
         vm.stopPrank();

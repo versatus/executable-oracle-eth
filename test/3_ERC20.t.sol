@@ -21,7 +21,7 @@ contract ExecutableOracleTest is PRBTest, StdCheats {
         executableOracle = new ExecutableOracle();
     }
 
-    function testStoreAndGetERC20Balance() external {
+    function testStoreAndGetERC20Balance() external pure {
         console2.log("Hello World");
     }
 }
