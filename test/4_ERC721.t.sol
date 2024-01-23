@@ -7,16 +7,16 @@ import { ExecutableOracle } from "../src/1_ExecutableOracle.sol";
 import { IERC721 } from "../src/1_ExecutableOracle.sol";
 
 contract ExecutableOracleTest is PRBTest, StdCheats {
-  ExecutableOracle internal executableOracle;
-  IERC721 internal erc721Token;
+    ExecutableOracle internal executableOracle;
+    IERC721 internal erc721Token;
 
-  function setUp() public virtual {
-    executableOracle = new ExecutableOracle();
-    // MockERC721 mockERC721Token = new MockERC721("MockToken", "MTK", 18);
-    // erc721Token = IERC721(address(mockERC721Token));
-  }
+    function setUp() public virtual {
+        executableOracle = new ExecutableOracle();
+        // MockERC721 mockERC721Token = new MockERC721("MockToken", "MTK", 18);
+        // erc721Token = IERC721(address(mockERC721Token));
+    }
 
-  function testStoreAndGetERC721Holdings() external {
-    console2.log("Hello World");
-  }
+    function testStoreAndGetERC721Holdings() external {
+        console2.log("Hello World");
+    }
 }

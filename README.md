@@ -18,7 +18,8 @@ A Foundry-based Executable Oracle contract for Ethereum to bridge to the Versatu
 - [Prettier](https://github.com/prettier/prettier): code formatter for non-Solidity files
 - [Solhint](https://github.com/protofire/solhint): linter for Solidity code
 
-This project is based off of the excellent `foundry-template` project by Paul Berg: https://github.com/paulrberg/foundry-template
+This project is based off of the excellent `foundry-template` project by Paul Berg:
+https://github.com/paulrberg/foundry-template
 
 ## Getting Started
 
