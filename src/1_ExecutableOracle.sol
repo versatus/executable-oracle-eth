@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity >=0.8.23 <0.9.0;
 
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
@@ -19,12 +19,13 @@ contract ExecutableOracle {
 
     struct Quorum {
         mapping(address => bool) quorumMembers;
-        mapping(string => mapping(address member => bool vote)) votes;
+        // mapping(string => mapping(address member => bool vote)) votes;
+        mapping(string => mapping(address => bool)) votes;
         mapping(string => mapping(bool => uint256)) voteCount;
         bool isActive;
         uint256 memberCount;
     }
-    
+
     struct BlobIndex {
         bytes32 batchHeaderHash;
         uint128 blobIndex;
@@ -34,12 +35,14 @@ contract ExecutableOracle {
     mapping(address => BlobIndex) public blobIndices;
     mapping(address => Quorum) public quorums;
     mapping(address => uint256) public ethBalance;
-    mapping(address user => mapping(address tokenAddress => uint256 balance)) ERC20Balance;
-    mapping(address user => mapping(address tokenAddress => uint256[])) ERC721Holdings;
+    // mapping(address user => mapping(address tokenAddress => uint256 balance)) ERC20Balance;
+    mapping(address => mapping(address => uint256)) ERC20Balance;
+    // mapping(address user => mapping(address tokenAddress => uint256[])) ERC721Holdings;
+    mapping(address => mapping(address => uint256[])) ERC721Holdings;
 
     event BlobIndexSettled(address[] indexed accounts, bytes32 batchHeaderHash, uint128 blobIndex, uint256 blobEventId);
-//  TODO(asmith) add a VerifiedBridgelsIn event
-//  TODO(asmith) add a 
+    //  TODO(asmith) add a VerifiedBridgelsIn event
+    //  TODO(asmith) add a
     event Bridge(
         address indexed user,
         address indexed tokenAddress,
@@ -58,10 +61,10 @@ contract ExecutableOracle {
         _;
     }
 
-//    function storeETH(bytes32 seed, bytes32 r, bytes32 s, uint v) external payable {
-//        ethBalance[msg.sender] += msg.value;
-//        emit BridgeVerified(msg.sender, address(0), msg.value, 0, "ETH", seed, r, s, v);    
-//    }
+    //    function storeETH(bytes32 seed, bytes32 r, bytes32 s, uint v) external payable {
+    //        ethBalance[msg.sender] += msg.value;
+    //        emit BridgeVerified(msg.sender, address(0), msg.value, 0, "ETH", seed, r, s, v);
+    //    }
 
     receive() external payable {
         ethBalance[msg.sender] += msg.value;
@@ -77,10 +80,10 @@ contract ExecutableOracle {
         return ERC20Balance[tokenAddress][user];
     }
 
-    function getERC721Holdings(address tokenAddress, address user) external view returns(uint256[] memory) {
+    function getERC721Holdings(address tokenAddress, address user) external view returns (uint256[] memory) {
         return ERC721Holdings[user][tokenAddress];
     }
-    
+
     function storeERC20(address tokenAddress, uint256 amount) public {
         require(IERC20(tokenAddress).transferFrom(msg.sender, address(this), amount), "Transfer failed");
         ERC20Balance[msg.sender][tokenAddress] += amount;
@@ -98,7 +101,7 @@ contract ExecutableOracle {
 
     function ERC721AlreadyStored(address tokenAddress, address user, uint256 tokenId) public view returns (bool) {
         uint256[] memory nfts = ERC721Holdings[user][tokenAddress];
-        for (uint i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; i++) {
             if (tokenId == nfts[i]) {
                 return true;
             }
@@ -107,23 +110,24 @@ contract ExecutableOracle {
     }
 
     function releaseERC20(address tokenAddress, address to, uint256 amount) public onlyOwner {
-        require(ERC20Balance[to][tokenAddress] > amount, "Insufficient balance");
+        require(ERC20Balance[to][tokenAddress] >= amount, "Insufficient balance");
         require(IERC20(tokenAddress).transfer(to, amount), "Transfer failed");
-        ERC20Balance[to][tokenAddress] -= amount;  
+        ERC20Balance[to][tokenAddress] -= amount;
     }
 
     function releaseERC721(address tokenAddress, address to, uint256 tokenId) public onlyOwner {
         require(ERC721AlreadyStored(tokenAddress, to, tokenId), "NFT not stored");
         IERC721(tokenAddress).safeTransferFrom(address(this), to, tokenId);
-        uint NFTIndex = getNFTIndex(tokenAddress, to, tokenId);
-        ERC721Holdings[to][tokenAddress][NFTIndex] = ERC721Holdings[to][tokenAddress][ERC721Holdings[to][tokenAddress].length - 1];
+        uint256 NFTIndex = getNFTIndex(tokenAddress, to, tokenId);
+        ERC721Holdings[to][tokenAddress][NFTIndex] =
+            ERC721Holdings[to][tokenAddress][ERC721Holdings[to][tokenAddress].length - 1];
         ERC721Holdings[to][tokenAddress].pop();
     }
 
-    function getNFTIndex(address tokenAddress, address user, uint256 tokenId) internal view returns (uint) {
+    function getNFTIndex(address tokenAddress, address user, uint256 tokenId) internal view returns (uint256) {
         require(ERC721AlreadyStored(tokenAddress, user, tokenId), "NFT not stored");
         uint256[] memory nfts = ERC721Holdings[user][tokenAddress];
-        for (uint i = 0; i < nfts.length; i++) {
+        for (uint256 i = 0; i < nfts.length; i++) {
             if (tokenId == nfts[i]) {
                 return i;
             }
@@ -142,17 +146,14 @@ contract ExecutableOracle {
     }
 
     function settleBlobIndex(address[] calldata accounts, BlobIndex calldata blobIndex) external onlyOwner {
-        for (uint i = 0; i < accounts.length; i++) {
+        for (uint256 i = 0; i < accounts.length; i++) {
             blobIndices[accounts[i]] = blobIndex;
         }
         settlementCounter += 1;
         emit BlobIndexSettled(accounts, blobIndex.batchHeaderHash, blobIndex.blobIndex, settlementCounter);
     }
 
-    function getBlobIndex(address user) external view returns(bytes32 batchHeaderHash, uint128 blobIndex) {
-        return (
-            blobIndices[user].batchHeaderHash, 
-            blobIndices[user].blobIndex
-        );
+    function getBlobIndex(address user) external view returns (bytes32 batchHeaderHash, uint128 blobIndex) {
+        return (blobIndices[user].batchHeaderHash, blobIndices[user].blobIndex);
     }
 }
