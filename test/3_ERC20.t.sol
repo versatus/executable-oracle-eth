@@ -14,14 +14,14 @@ import { IERC20 } from "../src/1_ExecutableOracle.sol";
 // storeERC20
 // releaseERC20
 contract ExecutableOracleTest is PRBTest, StdCheats {
-    ExecutableOracle internal executableOracle;
-    IERC20 internal erc20Token;
+  ExecutableOracle internal executableOracle;
+  IERC20 internal erc20Token;
 
-    function setUp() public virtual {
-        executableOracle = new ExecutableOracle();
-    }
+  function setUp() public virtual {
+    executableOracle = new ExecutableOracle();
+  }
 
-    function testStoreAndGetERC20Balance() external {
-        console2.log("Hello World");
-    }
+  function testStoreAndGetERC20Balance() external {
+    console2.log("Hello World");
+  }
 }
